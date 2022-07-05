@@ -1,5 +1,7 @@
+
 #pragma once
 #define SIM_SIZE 400
+/*
 class Fluid
 {
 
@@ -10,8 +12,9 @@ private:
 	float velocityy[SIM_SIZE * SIM_SIZE];
 
 public:
-	inline Fluid();
-	void velocitystep();
-	void setVelocities();
-};
+	 Fluid();
+	float getvelocityx(int index);
+	float getvelocityy(int index);
 
+};
+*/
