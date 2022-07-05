@@ -7,8 +7,12 @@
 #include<time.h>
 #include<math.h>
 #include<random>
+#include<thread>
 //#include"Fluid.h"
-#define SIM_SIZE 200
+using std::this_thread::sleep_for;
+#define SIM_SIZE 300
+
+constexpr int TIME_TO_SLEEP = 40;
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-1, 1); //doubles from -1 to 1
 int Index(int x, int y)
@@ -23,19 +27,27 @@ private :
 	float velocityx;
 	float velocityy;
 public: 
-	void updateParticle(int xarr[],int yarr[])
+	void updateParticle(float xarr[],float yarr[])
 	{
-		if (0 < cellx + velocityx + 0.5 && cellx + velocityx + 0.5 < 255)
+		if (1 < cellx + velocityx + 0.5 && cellx + velocityx + 0.5 < SIM_SIZE - 1)
 		{
 			cellx += (int)velocityx + 0.5;
 		}
-		if (0 < celly + velocityy + 0.5 && celly + velocityy + 0.5 < 255)
+		else {
+			velocityx = velocityx * -1;
+		}
+		if (1 < celly + velocityy + 0.5 && celly + velocityy + 0.5 < SIM_SIZE - 1)
 		{
 			celly += (int)velocityy + 0.5;
 		}
-		
-		velocityx = xarr[Index(cellx, celly)];
-		velocityy = yarr[Index(cellx, celly)];
+		else {
+			
+			velocityy = velocityy * -1;
+		}
+		velocityx *= 0.95;
+		velocityy *= 0.95;
+		velocityx += xarr[Index(cellx, celly)];
+		velocityy += yarr[Index(cellx, celly)];
 	}
 	int returnX() { return cellx; }
 	int returnY() { return celly; }
@@ -49,8 +61,8 @@ public:
 
 int main(int argc, char* argv[])
 {
-	int velocityx[SIM_SIZE * SIM_SIZE] = { 10 };
-	int velocityy[SIM_SIZE * SIM_SIZE] = { -10 };
+	float velocityx[SIM_SIZE * SIM_SIZE] = { 10 };
+	float velocityy[SIM_SIZE * SIM_SIZE] = { -10 };
 
 	bool keep_window_open = true;
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -71,29 +83,30 @@ int main(int argc, char* argv[])
 	
 	
 
-	const int particlecount = 3;
+	const int particlecount = 100;
 	Particle particles[particlecount] = {};
 	for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
 	{
 		
-		velocityx[i] = rand() % 19 + (-9);
-		velocityy[i] = rand() % 19 + (-9);
-	}
+		velocityx[i] = (float) (rand() % 13 + (-6))/6 ;
+		velocityy[i] = (float) (rand() % 13 + (-6))/6;
+	};
 	for (int i = 0; i < particlecount; ++i)
 	{
 		Particle a;
 		
 		a.setX(rand() % SIM_SIZE);
 		a.setY(rand() % SIM_SIZE);
-		a.setU(Index(a.returnX(), a.returnY()));
-		a.setV(Index(a.returnX(), a.returnY()));
+		a.setU(Index(0,0));
+		a.setV(Index(0,0));
 		particles[i] = a;
-		std::cout << a.returnX();
 	}
 	
 	memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 	while (keep_window_open)
 	{
+		memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
+		sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
 		/*
 		for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
 		{
@@ -114,11 +127,9 @@ int main(int argc, char* argv[])
 		for (int i = 0; i < particlecount; ++i)
 		{
 			particles[i].updateParticle(velocityx, velocityy);
-			std::cout << particles[i].returnU();
 			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 255, 255,255);;
 		}
-		std::cout << "tick";
-		
+		std::cout << std::to_string(particles[0].returnU())+ "   \n";
 		//Texture Update
 		SDL_UpdateTexture(texture, NULL, pixels, SIM_SIZE * sizeof(Uint32));
 		SDL_RenderClear(renderer);
