@@ -8,18 +8,27 @@
 #include<math.h>
 #include<random>
 #include<thread>
+#include"Fluid.h"
 //#include"Fluid.h"
 using std::this_thread::sleep_for;
-#define SIM_SIZE 300
+#define SIM_SIZE 1000
 
-constexpr int TIME_TO_SLEEP = 40;
+
+constexpr int TIME_TO_SLEEP = 1;
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-1, 1); //doubles from -1 to 1
+
+		
+
 int Index(int x, int y)
 {
 	return (y * SIM_SIZE + x);
 }
+void fluidStep(float xarr[], float yarr[])
+{
+	float timescale = 0.6;
 
+}
 struct Particle {
 private :
 	int cellx;
@@ -27,7 +36,7 @@ private :
 	float velocityx;
 	float velocityy;
 public: 
-	void updateParticle(float xarr[],float yarr[])
+	void updateParticle(float x,float y)
 	{
 		if (1 < cellx + velocityx + 0.5 && cellx + velocityx + 0.5 < SIM_SIZE - 1)
 		{
@@ -46,8 +55,8 @@ public:
 		}
 		velocityx *= 0.95;
 		velocityy *= 0.95;
-		velocityx += xarr[Index(cellx, celly)];
-		velocityy += yarr[Index(cellx, celly)];
+		velocityx += x;
+		velocityy += y;
 	}
 	int returnX() { return cellx; }
 	int returnY() { return celly; }
@@ -58,39 +67,35 @@ public:
 	void setU(float uval) { this->velocityx = uval; }
 	void setV(float vval) { this->velocityy = vval; }
 };
-
+float Fluid::velocityu[SIM_SIZE * SIM_SIZE] = { 0 };
+float Fluid::velocityv[SIM_SIZE * SIM_SIZE] = { 0 };
+float Fluid::uold[SIM_SIZE * SIM_SIZE] = { 0 };
+float Fluid::vold[SIM_SIZE * SIM_SIZE] = { 0 };
 int main(int argc, char* argv[])
 {
-	float velocityx[SIM_SIZE * SIM_SIZE] = { 10 };
-	float velocityy[SIM_SIZE * SIM_SIZE] = { -10 };
+
 
 	bool keep_window_open = true;
+	//SDL2 (2D Renderer) Initialisation
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* window = SDL_CreateWindow("Getting Started", SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, SIM_SIZE, SIM_SIZE, 0);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_Surface* window_surface = SDL_GetWindowSurface(window);
-	// Syntax
-	//std::cout << "Hello";
-	
-	static int array1[SIM_SIZE*SIM_SIZE] = {0};
-	int y = 0;
 	SDL_Texture* texture = SDL_CreateTexture(renderer,
 		SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, SIM_SIZE, SIM_SIZE);
 	Uint32* pixels = new Uint32[SIM_SIZE * SIM_SIZE];
+	//init flowfield arrays
+		Fluid f(0,0);
+		f.setFlowFields();
+	//f.stepVelocity();
+	//Randomize flow field velocities
 
-	
-	
-	
 
-	const int particlecount = 100;
+
+	//Initialize visualisation particles & set initial positions.
+	const int particlecount = 1;
 	Particle particles[particlecount] = {};
-	for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
-	{
-		
-		velocityx[i] = (float) (rand() % 13 + (-6))/6 ;
-		velocityy[i] = (float) (rand() % 13 + (-6))/6;
-	};
 	for (int i = 0; i < particlecount; ++i)
 	{
 		Particle a;
@@ -107,27 +112,11 @@ int main(int argc, char* argv[])
 	{
 		memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 		sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
-		/*
-		for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
-		{
-			
-			int x = i % simulationlength;
-
-			array1[i] = 2 * y;
-			if (x == 0 && i != 0) {
-				y += 1;
-			}
-			
-			//pixels[i] = SDL_MapRGB(window_surface->format, array1[i]*i, array1[i]*i,array1[i]);
-			pixels[i] = i + x + y;
-			//std::cout << std::to_string(x) + " " + std::to_string(y) + "\n";
-
-		}
-		*/
+		
 		for (int i = 0; i < particlecount; ++i)
 		{
-			particles[i].updateParticle(velocityx, velocityy);
-			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 255, 255,255);;
+			particles[i].updateParticle(f.getU(i), f.getV(i));
+			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 254, 254, 254);;
 		}
 		std::cout << std::to_string(particles[0].returnU())+ "   \n";
 		//Texture Update
