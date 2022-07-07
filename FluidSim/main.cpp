@@ -14,7 +14,7 @@ using std::this_thread::sleep_for;
 #define SIM_SIZE 1000
 
 
-constexpr int TIME_TO_SLEEP = 1;
+constexpr int TIME_TO_SLEEP = 10;
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-1, 1); //doubles from -1 to 1
 
@@ -38,14 +38,14 @@ private :
 public: 
 	void updateParticle(float x,float y)
 	{
-		if (1 < cellx + velocityx + 0.5 && cellx + velocityx + 0.5 < SIM_SIZE - 1)
+		if (1 < cellx + velocityx + 1 && cellx + velocityx + 1 < SIM_SIZE - 1)
 		{
 			cellx += (int)velocityx + 0.5;
 		}
 		else {
 			velocityx = velocityx * -1;
 		}
-		if (1 < celly + velocityy + 0.5 && celly + velocityy + 0.5 < SIM_SIZE - 1)
+		if (1 < celly + velocityy + 1 && celly + velocityy + 1 < SIM_SIZE - 1)
 		{
 			celly += (int)velocityy + 0.5;
 		}
@@ -53,8 +53,8 @@ public:
 			
 			velocityy = velocityy * -1;
 		}
-		velocityx *= 0.95;
-		velocityy *= 0.95;
+		velocityx *= 0.99;
+		velocityy *= 0.99;
 		velocityx += x;
 		velocityy += y;
 	}
@@ -110,15 +110,14 @@ int main(int argc, char* argv[])
 	memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 	while (keep_window_open)
 	{
-		memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
+		//memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 		sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
 		
 		for (int i = 0; i < particlecount; ++i)
 		{
-			particles[i].updateParticle(f.getU(i), f.getV(i));
+			particles[i].updateParticle(f.getU(Index(particles[i].returnX(), particles[i].returnY())), f.getV(Index(particles[i].returnX(), particles[i].returnY())));
 			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 254, 254, 254);;
 		}
-		std::cout << std::to_string(particles[0].returnU())+ "   \n";
 		//Texture Update
 		SDL_UpdateTexture(texture, NULL, pixels, SIM_SIZE * sizeof(Uint32));
 		SDL_RenderClear(renderer);

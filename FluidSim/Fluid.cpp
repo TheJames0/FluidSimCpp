@@ -14,8 +14,8 @@ void Fluid::setFlowFields()
 	for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
 	{
 
-		velocityu[i] = (float)(rand() % 61 + (-30)) / 16;
-		velocityv[i] = (float)(rand() % 61 + (-30)) / 16;
+		velocityu[i] = (float)(rand() % 13 + (-6)) / 6;
+		velocityv[i] = (float)(rand() % 13 + (-6)) / 6;
 	};
 }
 void Fluid::linearSolve(float x[],float x0[],float a,float c)
@@ -51,6 +51,7 @@ void Fluid::stepVelocity()
 }
 float Fluid::getU(int index)
 {
+	std::cout << velocityu[index];
 	return velocityu[index];
 }
 float Fluid::getV(int index)
