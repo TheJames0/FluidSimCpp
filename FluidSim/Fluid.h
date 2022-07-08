@@ -1,5 +1,5 @@
 #pragma once
-#define SIM_SIZE 1000
+#define SIM_SIZE 300
 class Fluid
 {
 	private:
@@ -27,11 +27,14 @@ class Fluid
 		void setFlowFields();
 		void stepVelocity();
 		void diffuse(float [], float [],float );
-		void advect();
+		void advect(float d[], float d0[], float velocX[], float velocY[], float dt);
 		void linearSolve(float xarr[], float prevxarr[],float a, float c);
 		void swapU(float x[],float x0[]);
 		void swapV(float x[], float x0[]);
 		float getU(int index);
 		float getV(int index);
+		int Index(int i, int j);
+		void addVat(int, float, float);
+		void project(float velocX[], float velocY[], float* p, float* div, int iter);
 	};
 

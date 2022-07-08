@@ -11,10 +11,10 @@
 #include"Fluid.h"
 //#include"Fluid.h"
 using std::this_thread::sleep_for;
-#define SIM_SIZE 1000
+#define SIM_SIZE 300
 
 
-constexpr int TIME_TO_SLEEP = 10;
+constexpr int TIME_TO_SLEEP = 1;
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-1, 1); //doubles from -1 to 1
 
@@ -31,8 +31,8 @@ void fluidStep(float xarr[], float yarr[])
 }
 struct Particle {
 private :
-	int cellx;
-	int celly;
+	float cellx;
+	float celly;
 	float velocityx;
 	float velocityy;
 public: 
@@ -40,23 +40,23 @@ public:
 	{
 		if (1 < cellx + velocityx + 1 && cellx + velocityx + 1 < SIM_SIZE - 1)
 		{
-			cellx += (int)velocityx + 0.5;
+			cellx += velocityx;
 		}
 		else {
 			velocityx = velocityx * -1;
 		}
 		if (1 < celly + velocityy + 1 && celly + velocityy + 1 < SIM_SIZE - 1)
 		{
-			celly += (int)velocityy + 0.5;
+			celly += velocityy;
 		}
 		else {
 			
 			velocityy = velocityy * -1;
 		}
-		velocityx *= 0.99;
-		velocityy *= 0.99;
-		velocityx += x;
-		velocityy += y;
+		//velocityx *= 0.99;
+		//velocityy *= 0.99;
+		velocityx += 2*x;
+		velocityy += 2*y;
 	}
 	int returnX() { return cellx; }
 	int returnY() { return celly; }
@@ -87,14 +87,14 @@ int main(int argc, char* argv[])
 	Uint32* pixels = new Uint32[SIM_SIZE * SIM_SIZE];
 	//init flowfield arrays
 		Fluid f(0,0);
-		f.setFlowFields();
-	//f.stepVelocity();
+		//f.setFlowFields();
+		
 	//Randomize flow field velocities
 
 
 
 	//Initialize visualisation particles & set initial positions.
-	const int particlecount = 1;
+	const int particlecount = 8000;
 	Particle particles[particlecount] = {};
 	for (int i = 0; i < particlecount; ++i)
 	{
@@ -110,14 +110,19 @@ int main(int argc, char* argv[])
 	memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 	while (keep_window_open)
 	{
-		//memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
-		sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
-		
+		//sleep_for(std::chrono::milliseconds(TIME_TO_SLEEP));
+		memset(pixels, 10, SIM_SIZE * SIM_SIZE * sizeof(Uint32));
 		for (int i = 0; i < particlecount; ++i)
 		{
 			particles[i].updateParticle(f.getU(Index(particles[i].returnX(), particles[i].returnY())), f.getV(Index(particles[i].returnX(), particles[i].returnY())));
-			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 254, 254, 254);;
+			pixels[Index(particles[i].returnX(), particles[i].returnY())] = SDL_MapRGB(window_surface->format, 254, 254, 254);
 		}
+		for (int i = 0; i < SIM_SIZE * SIM_SIZE; ++i)
+		{
+			pixels[i] = f.getV(i) * 255;
+		}
+		f.stepVelocity();
+		f.addVat(50000, 1000, 1000);
 		//Texture Update
 		SDL_UpdateTexture(texture, NULL, pixels, SIM_SIZE * sizeof(Uint32));
 		SDL_RenderClear(renderer);
@@ -139,6 +144,8 @@ int main(int argc, char* argv[])
 			
 			
 		}
+
+		
 	}
 	
 	return 0;
