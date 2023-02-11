@@ -1,20 +1,20 @@
-/*
-#include "Fluid.h"
+#include "fluid.h"
 
-Fluid::Fluid()
+FluidCell::FluidCell(float arg_diffusion, float arg_viscocity, float arg_dt)
 {
-	 velocityx[SIM_SIZE * SIM_SIZE] = { 0 };
-	 velocityy[SIM_SIZE * SIM_SIZE] = { 0 };
-	
+	size = SIZE;
+	dt = arg_dt;
+	diffusion = arg_diffusion;
+	viscocity = arg_viscocity;
+	for (int i = 0; i < SIZE * SIZE; i++)
+	{
+		velocityX[i] = velocityX_prev[i] = 0.0f;
+		density[i] = density_prev[i] = 0.0f;
+		velocityY[i] = velocityY_prev[i] = 0.0f;
+	}
 }
 
-float Fluid::getvelocityx(int index)
+FluidCell::~FluidCell()
 {
-	return velocityx[index];
+	delete[] velocityX, velocityX_prev, velocityY, velocityY_prev, density, density_prev;
 }
-float Fluid::getvelocityy(int index)
-{
-	return velocityy[index];
-}
-
-*/

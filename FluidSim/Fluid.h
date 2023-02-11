@@ -1,20 +1,19 @@
-
 #pragma once
-#define SIM_SIZE 400
-/*
-class Fluid
+#define SIZE 200
+
+class FluidCell
 {
-
-private:
-	int n;
-	float density[SIM_SIZE * SIM_SIZE];
-	float velocityx[SIM_SIZE * SIM_SIZE];
-	float velocityy[SIM_SIZE * SIM_SIZE];
-
 public:
-	 Fluid();
-	float getvelocityx(int index);
-	float getvelocityy(int index);
-
+	int size;
+	float diffusion, viscocity, dt;
+	float velocityX[SIZE * SIZE];
+	float velocityX_prev[SIZE * SIZE];
+	float velocityY[SIZE * SIZE];
+	float velocityY_prev[SIZE * SIZE];
+	float density[SIZE * SIZE];
+	float density_prev[SIZE * SIZE];
+	FluidCell(float arg_diffusion, float arg_viscocity, float arg_dt);
+	~FluidCell();
 };
-*/
+
+
